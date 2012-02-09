@@ -28,8 +28,10 @@ class CalculatedProperty(object):
     def __get__(self, obj, type=None):
         if obj is None:
             return self
-        value = self.func(obj)
-        setattr(obj, self.__name__, value)
+        value = getattr(obj, "__" + self.__name__, None)
+        if value == None:
+            value = self.func(obj)
+            setattr(obj, "__" + self.__name__, value)
         return value
 
     def __repr__(self):
@@ -178,7 +180,7 @@ class Regexp(BaseRegexp):
         result = []
         startstring = string[:pos]
         n = 0
-        push_match = (flag and result.append or result.extend)
+        push_match = (flat and result.append or result.extend)
         while 1:
             state = regexp_match(self, string, pos, endpos, False)
             if state is None:
