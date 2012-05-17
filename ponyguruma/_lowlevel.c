@@ -415,7 +415,7 @@ regexp_match(PyObject *self, PyObject *args)
 				"object required");
 		return NULL;
 	}
-	if (pos < 0) {
+	if ((int)pos < 0) {
 		PyErr_SetString(PyExc_ValueError, "pos must be >= 0");
 		return NULL;
 	}
@@ -447,11 +447,11 @@ regexp_match(PyObject *self, PyObject *args)
 				"string or unicode");
 		return NULL;
 	}
-	if (endpos == -1) {
+	if ((int)endpos == -1) {
 		endpos = (regexp->unicode ? PyUnicode_GET_SIZE(string) :
 			  PyString_GET_SIZE(string));
 	}
-	if (endpos < 0) {
+	if ((int)endpos < 0) {
 		PyErr_SetString(PyExc_ValueError, "endpos must be >= -1, where "
 				"-1 means the length of the string to match");
 		Py_DECREF(string);
