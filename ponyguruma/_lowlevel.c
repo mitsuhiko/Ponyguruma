@@ -30,6 +30,10 @@
 #  error "unsupported Py_UNICODE_SIZE"
 #endif
 
+#ifndef Py_TYPE
+    #define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
+#endif
+
 typedef struct {
 	PyObject_HEAD
 	regex_t *regex;
@@ -229,7 +233,7 @@ BaseRegexp_dealloc(BaseRegexp *self)
 	if (self->regex)
 		onig_free(self->regex);
 	Py_XDECREF(self->pattern);
-	self->ob_type->tp_free((PyObject *)self);
+	Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
 /**
@@ -319,7 +323,7 @@ MatchState_dealloc(MatchState *self)
 	Py_XDECREF(self->string);
 	if (self->region)
 		onig_region_free(self->region, 1);
-	self->ob_type->tp_free(self);
+	Py_TYPE(self)->tp_free(self);
 }
 
 
