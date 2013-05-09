@@ -34,7 +34,7 @@ def xx(pattern, str_, from_, to, mem, not_):
                         pattern, str_, from_, to))
             else:
                 errors.append("%r should match with %r" % (pattern, str_))
-    except Exception, err:
+    except Exception as err:
         errors.append("got exception with pattern %r and string %r: %s" %
                       (pattern, str_, err))
 
@@ -734,7 +734,6 @@ if __name__ == '__main__':
   # <<< copied until here
 
   for entry in errors:
-    print entry
-  print
-  print "RESULTS:"
-  print "%d tests, %d failed." % (runs[0], len(errors))
+    print(entry)
+  print("RESULTS:")
+  print("%d tests, %d failed." % (runs[0], len(errors)))

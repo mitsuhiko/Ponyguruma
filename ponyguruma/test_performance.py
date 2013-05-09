@@ -52,5 +52,5 @@ def t_match_onig_complex():
 if __name__ == '__main__':
     for key in sorted(locals().keys()):
         if key.startswith('t_'):
-            print key[2:],
-            print r(locals()[key])
+            print(key[2:]),
+            print(r(locals()[key]))

@@ -29,18 +29,18 @@ def xx(pattern, str_, from_, to, mem, not_):
             if not m:
                 return
             else:
-                errors.append(u"%r should not match with %r" % (upattern, ustr))
+                errors.append("%r should not match with %r" % (upattern, ustr))
         else:
             if m:
                 if m.span(mem) == (from_, to):
                     return
                 else:
-                    errors.append(u"%r should match with %r from %s to %s" % (
+                    errors.append("%r should match with %r from %s to %s" % (
                         upattern, ustr, from_, to))
             else:
-                errors.append(u"%r should match with %r" % (upattern, ustr))
-    except Exception, err:
-        errors.append(u"got %s exception with pattern %r and string %r: %s" %
+                errors.append("%r should match with %r" % (upattern, ustr))
+    except Exception as err:
+        errors.append("got %s exception with pattern %r and string %r: %s" %
                       (err.__class__.__name__, upattern, ustr, err))
 
 def x2(pattern, str_, from_, to):
@@ -739,7 +739,6 @@ if __name__ == '__main__':
   # <<< copied until here
 
   for entry in errors:
-    print entry
-  print
-  print "RESULTS:"
-  print "%d tests, %d failed." % (runs[0], len(errors))
+    print(entry)
+  print("RESULTS:")
+  print("%d tests, %d failed." % (runs[0], len(errors)))

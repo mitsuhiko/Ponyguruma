@@ -22,7 +22,7 @@ class CalculatedProperty(object):
 
     def __init__(self, func):
         self.func = func
-        self.__name__ = func.func_name
+        self.__name__ = func.__name__
         self.__doc__ = func.__doc__
 
     def __get__(self, obj, type=None):
