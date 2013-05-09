@@ -241,7 +241,7 @@ class Match(object):
         regexp ``r'(.)(.)(.)'`` matched against ``abc`` will return
         ``('a', 'b', 'c')`` but not ``('abc', 'a', 'b', 'c')``.
         """
-        return tuple([self.group(x) for x in xrange(1, len(self.spans))])
+        return tuple([self.group(x) for x in range(1, len(self.spans))])
     groups = CalculatedProperty(groups)
 
     def groupdict(self):
@@ -298,7 +298,7 @@ class Match(object):
         named group, otherwise an integer.  If you omit the value the
         span of the whole match is returned.
         """
-        if isinstance(group, basestring):
+        if isinstance(group, str):
             group = self.groupnames[group]
         return self.spans[group]
 
@@ -320,7 +320,7 @@ class Match(object):
         """
         Return the value of a single group.
         """
-        if isinstance(group, basestring):
+        if isinstance(group, str):
             group = self.groupnames[group]
         return match_extract_group(self.state, group)
 
