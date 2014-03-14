@@ -18,7 +18,7 @@ COMPLEX = r"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*" \
 
 def r(t, rep=100000):
     s = time.time()
-    for x in xrange(rep):
+    for x in range(rep):
         t()
     return time.time() - s
 

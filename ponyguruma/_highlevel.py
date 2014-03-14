@@ -200,9 +200,6 @@ class Regexp(BaseRegexp):
     def __str__(self):
         return str(self.pattern)
 
-    def __unicode__(self):
-        return unicode(self.pattern)
-
     def __repr__(self):
         return 'Regexp(%r)' % (self.pattern,)
 
@@ -378,9 +375,6 @@ class Match(object):
     def __nonzero__(self):
         # If this isn't defined, Python checks if __len__() != 0!
         return True
-
-    def __unicode__(self):
-        return unicode(self.group(0))
 
     def __str__(self):
         return str(self.group(0))
