@@ -30,6 +30,20 @@
 #  error "unsupported Py_UNICODE_SIZE"
 #endif
 
+#ifndef Py_TYPE
+    #define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
+#endif
+
+#if PY_MAJOR_VERSION >= 3
+    #define PyString_Check PyBytes_Check
+    #define PyInt_FromSsize_t PyLong_FromSsize_t
+    #define PyString_FromStringAndSize PyBytes_FromStringAndSize
+    #define PyString_GET_SIZE PyBytes_GET_SIZE
+    #define PyInt_FromLong PyLong_FromLong
+    #define Py_InitModule3 PyModule_Create
+    #define PyString_AS_STRING _PyUnicode_AsString
+#endif 
+
 typedef struct {
 	PyObject_HEAD
 	regex_t *regex;
@@ -229,7 +243,7 @@ BaseRegexp_dealloc(BaseRegexp *self)
 	if (self->regex)
 		onig_free(self->regex);
 	Py_XDECREF(self->pattern);
-	self->ob_type->tp_free((PyObject *)self);
+	Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
 /**
@@ -266,8 +280,7 @@ static PyGetSetDef BaseRegexp_getsetters[] = {
 
 
 static PyTypeObject BaseRegexpType = {
-	PyObject_HEAD_INIT(NULL)
-	0,				/* ob_size */
+	PyVarObject_HEAD_INIT(NULL, 0)
 	"ponyguruma._lowlevel.BaseRegexp", /* tp_name */
 	sizeof(BaseRegexp),		/* tp_basicsize */
 	0,				/* tp_itemsize */
@@ -287,7 +300,7 @@ static PyTypeObject BaseRegexpType = {
 	0,				/* tp_setattro */
 	0,				/* tp_as_buffer */
 	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
-	"",				/* tp_doc */
+	0,				/* tp_doc */
 	0,				/* tp_traverse */
 	0,				/* tp_clear */
 	0,				/* tp_richcompare */
@@ -319,7 +332,7 @@ MatchState_dealloc(MatchState *self)
 	Py_XDECREF(self->string);
 	if (self->region)
 		onig_region_free(self->region, 1);
-	self->ob_type->tp_free(self);
+	Py_TYPE(self)->tp_free(self);
 }
 
 
@@ -359,8 +372,7 @@ static PyGetSetDef MatchState_getsetters[] = {
 
 
 static PyTypeObject MatchStateType = {
-	PyObject_HEAD_INIT(NULL)
-	0,				/* ob_size */
+	PyVarObject_HEAD_INIT(NULL, 0)
 	"ponyguruma._lowlevel.MatchState", /* tp_name */
 	sizeof(MatchState),		/* tp_basicsize */
 	0,				/* tp_itemsize */
@@ -415,7 +427,7 @@ regexp_match(PyObject *self, PyObject *args)
 				"object required");
 		return NULL;
 	}
-	if (pos < 0) {
+	if ((int)pos < 0) {
 		PyErr_SetString(PyExc_ValueError, "pos must be >= 0");
 		return NULL;
 	}
@@ -447,11 +459,11 @@ regexp_match(PyObject *self, PyObject *args)
 				"string or unicode");
 		return NULL;
 	}
-	if (endpos == -1) {
+	if ((int)endpos == -1) {
 		endpos = (regexp->unicode ? PyUnicode_GET_SIZE(string) :
 			  PyString_GET_SIZE(string));
 	}
-	if (endpos < 0) {
+	if ((int)endpos < 0) {
 		PyErr_SetString(PyExc_ValueError, "endpos must be >= -1, where "
 				"-1 means the length of the string to match");
 		Py_DECREF(string);
@@ -658,25 +670,41 @@ static PyMethodDef module_methods[] = {
 	{NULL, NULL, 0, NULL}
 };
 
-
-#ifndef PyMODINIT_FUNC
-#define PyMODINIT_FUNC void
+#if PY_MAJOR_VERSION >= 3
+static struct PyModuleDef moduledef = {
+	PyModuleDef_HEAD_INIT,
+	"ponyguruma._lowlevel", /* m_name */
+	"",                   /* m_doc */
+	-1,                  /* m_size */
+	module_methods,    /* m_methods */
+	NULL,                /* m_reload */
+	NULL,                /* m_traverse */
+	NULL,                /* m_clear */
+	NULL,                /* m_free */
+};
 #endif
-PyMODINIT_FUNC
-init_lowlevel(void)
+
+static PyObject *
+moduleinit(void)
 {
 	PyObject *module;
-
+	
 	if (init_python_syntax() < 0)
-		return;
-
+		return NULL;
+	
 	if (PyType_Ready(&BaseRegexpType) < 0 ||
 	    PyType_Ready(&MatchStateType) < 0 )
-		return;
+		return NULL;
 
-	module = Py_InitModule3("ponyguruma._lowlevel", module_methods, "");
+#if PY_MAJOR_VERSION >= 3
+	module = PyModule_Create(&moduledef);
+#else
+	module = Py_InitModule3("ponyguruma._lowlevel",
+			    module_methods, "");
+#endif
+
 	if (!module)
-		return;
+		return NULL;
 
 	RegexpError = PyErr_NewException("ponyguruma.RegexpError", NULL, NULL);
 	Py_INCREF(RegexpError);
@@ -695,4 +723,20 @@ init_lowlevel(void)
 
 	onig_set_warn_func(on_regexp_warning);
 	onig_set_verb_warn_func(on_regexp_warning);
+	
+	return module;
 }
+
+#if PY_MAJOR_VERSION >= 3
+PyMODINIT_FUNC
+PyInit__lowlevel(void)
+{
+	return moduleinit();
+}
+#else
+PyMODINIT_FUNC
+init_lowlevel(void)
+{
+	moduleinit();
+}
+#endif

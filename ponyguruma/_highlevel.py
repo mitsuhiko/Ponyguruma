@@ -22,14 +22,16 @@ class CalculatedProperty(object):
 
     def __init__(self, func):
         self.func = func
-        self.__name__ = func.func_name
+        self.__name__ = func.__name__
         self.__doc__ = func.__doc__
 
     def __get__(self, obj, type=None):
         if obj is None:
             return self
-        value = self.func(obj)
-        setattr(obj, self.__name__, value)
+        value = getattr(obj, "__" + self.__name__, None)
+        if value == None:
+            value = self.func(obj)
+            setattr(obj, "__" + self.__name__, value)
         return value
 
     def __repr__(self):
@@ -178,7 +180,7 @@ class Regexp(BaseRegexp):
         result = []
         startstring = string[:pos]
         n = 0
-        push_match = (flag and result.append or result.extend)
+        push_match = (flat and result.append or result.extend)
         while 1:
             state = regexp_match(self, string, pos, endpos, False)
             if state is None:
@@ -197,9 +199,6 @@ class Regexp(BaseRegexp):
 
     def __str__(self):
         return str(self.pattern)
-
-    def __unicode__(self):
-        return unicode(self.pattern)
 
     def __repr__(self):
         return 'Regexp(%r)' % (self.pattern,)
@@ -239,7 +238,7 @@ class Match(object):
         regexp ``r'(.)(.)(.)'`` matched against ``abc`` will return
         ``('a', 'b', 'c')`` but not ``('abc', 'a', 'b', 'c')``.
         """
-        return tuple([self.group(x) for x in xrange(1, len(self.spans))])
+        return tuple([self.group(x) for x in range(1, len(self.spans))])
     groups = CalculatedProperty(groups)
 
     def groupdict(self):
@@ -296,7 +295,7 @@ class Match(object):
         named group, otherwise an integer.  If you omit the value the
         span of the whole match is returned.
         """
-        if isinstance(group, basestring):
+        if isinstance(group, str):
             group = self.groupnames[group]
         return self.spans[group]
 
@@ -318,7 +317,7 @@ class Match(object):
         """
         Return the value of a single group.
         """
-        if isinstance(group, basestring):
+        if isinstance(group, str):
             group = self.groupnames[group]
         return match_extract_group(self.state, group)
 
@@ -376,9 +375,6 @@ class Match(object):
     def __nonzero__(self):
         # If this isn't defined, Python checks if __len__() != 0!
         return True
-
-    def __unicode__(self):
-        return unicode(self.group(0))
 
     def __str__(self):
         return str(self.group(0))

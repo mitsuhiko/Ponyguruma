@@ -79,7 +79,7 @@ class SRE_Match(Match):
     def groupdict(self, default=None):
         rv = Match.groupdict.__get__(self)
         if default is not None:
-            for name, value in rv.iteritems():
+            for name, value in rv.items():
                 if value is None:
                     rv[name] = default
         return rv
